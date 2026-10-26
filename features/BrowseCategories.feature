@@ -12,11 +12,14 @@ Scenario: Select a subcategory from a category page
     When I select the subcategory "Monitors"
     Then I should be on the "Monitors" subcategory page
     And the page heading should contain "Monitors"
-    And at least one product should be displayed
+    And I should see a list of products in the subcategory
 
-Scenario: Sort products in a subcategory by price
+Scenario Outline: Sort products in a subcategory by price
     Given I am on the "Monitors" subcategory page
-    When I sort the products by "Price (Low > High)"
-    Then the products should be listed in ascending price order
-    When I sort the products by "Price (High > Low)"
-    Then the products should be listed in descending price order
+    When I sort the products by "<sort_option>"
+    Then the products should be listed in <order> price order
+
+    Examples:
+        | sort_option        | order      |
+        | Price (Low > High) | ascending  |
+        | Price (High > Low) | descending |
