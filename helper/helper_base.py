@@ -56,4 +56,8 @@ class HelperBase(object):
 
     def click_element(self, element):
         self._driver_wait.until(EC.element_to_be_clickable(element))
-        element.click()
+        self.scroll_into_view(element)
+        try:
+            element.click()
+        except ElementClickInterceptedException:
+            self.js_click(element)

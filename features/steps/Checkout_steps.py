@@ -1,3 +1,4 @@
+import time
 from urllib.parse import quote_plus
 from behave import given, when, then
 from selenium.webdriver.common.by import By
@@ -68,10 +69,11 @@ def step_fill_billing_details(context):
             postcode.clear()
             postcode.send_keys("90001")
 
-    select_when_ready(helper, "input-payment-country", "United States")
-    select_when_ready(helper, "input-payment-zone", "California")
+        select_when_ready(helper, "input-payment-country", "United States")
+        select_when_ready(helper, "input-payment-zone", "California")
 
     continue_to(helper, "#button-payment-address", "#collapse-shipping-address.in, #collapse-shipping-method.in")
+    time.sleep(2)  # wait for the next step to be ready
 
 
 @when('I fill out my delivery details')
@@ -86,6 +88,7 @@ def step_fill_delivery_details(context):
         if existing and not existing.is_selected():
             helper.click_element(existing)
         continue_to(helper, SHIPPING_ADDRESS_CONTINUE, "#collapse-shipping-method.in")
+    time.sleep(2)  # wait for the next step to be ready
 
 
 @when('I select a delivery method')
@@ -95,6 +98,7 @@ def step_select_delivery_method(context):
     if not flat_shipping_radio.is_selected():
         helper.click_element(flat_shipping_radio)
     continue_to(helper, "#button-shipping-method", "#collapse-payment-method.in")
+    time.sleep(2)  # wait for the next step to be ready
 
 @when('I select a payment method')
 def step_select_payment_method(context):
@@ -107,12 +111,14 @@ def step_select_payment_method(context):
     if not terms_checkbox.is_selected():
         helper.click_element(terms_checkbox)
     continue_to(helper, "#button-payment-method", "#collapse-checkout-confirm.in")
+    time.sleep(2)  # wait for the next step to be ready
 
 
 @when('I confirm the order')
 def step_confirm_order(context):
     helper = context.helper
     helper.click_element(helper.find_by_css("input[value='Confirm Order']"))
+    time.sleep(2)  # wait for the next step to be ready
 
 
 @then('I should be on the order confirmation page')
