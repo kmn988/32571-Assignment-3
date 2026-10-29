@@ -12,35 +12,22 @@ class HelperBase(object):
         self._driver_wait = WebDriverWait(driver, self.__TIMEOUT)
         self._driver = driver
 
-    # ---------- access ----------
+    # --- access ---
     @property
     def driver(self):
-        """Underlying Selenium WebDriver."""
         return self._driver
 
     def wait(self, timeout=15):
-        """Explicit wait with a custom timeout (default 15s, longer than the 10s helper default)."""
         return WebDriverWait(self._driver, timeout)
 
-    # ---------- navigation ----------
-    def open_homepage(self):
-        self._driver.get("https://opencart.abstracta.us/index.php?route=common/home")
-
+    # --- navigation ---
     def open(self, url):
         self._driver.get(url)
-
-    def wait_for_page_load(self):
-        self._driver_wait.until(
-            lambda driver: driver.execute_script("return document.readyState") == "complete"
-        )
-
-    def execute_script(self, script, *args):
-        return self._driver.execute_script(script, *args)
 
     def close(self):
         self._driver.quit()
 
-    # ---------- finders (wait until visible) ----------
+    # --- finders (wait until visible) ---
     def find_by_name(self, name):
         return self._driver_wait.until(EC.visibility_of_element_located((By.NAME, name)))
 
@@ -53,14 +40,14 @@ class HelperBase(object):
     def find_by_xpath(self, xpath):
         return self._driver_wait.until(EC.visibility_of_element_located((By.XPATH, xpath)))
 
-    # ---------- finders (no waiting, may return an empty list) ----------
+    # --- finders (no waiting, may return an empty list) ---
     def find_all_by_css(self, css_selector):
         return self._driver.find_elements(By.CSS_SELECTOR, css_selector)
 
     def find_all_by_xpath(self, xpath):
         return self._driver.find_elements(By.XPATH, xpath)
 
-    # ---------- clicking ----------
+    # --- clicking ---
     def scroll_into_view(self, element):
         self._driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
 
@@ -68,11 +55,5 @@ class HelperBase(object):
         self._driver.execute_script("arguments[0].click();", element)
 
     def click_element(self, element):
-        """Wait until clickable, scroll to it and click; fall back to a JS click if something
-        (e.g. the Bitnami banner in the corner) intercepts the native click."""
         self._driver_wait.until(EC.element_to_be_clickable(element))
-        self.scroll_into_view(element)
-        try:
-            element.click()
-        except ElementClickInterceptedException:
-            self.js_click(element)
+        element.click()

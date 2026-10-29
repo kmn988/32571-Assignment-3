@@ -9,7 +9,6 @@ def before_all(context):
 
     helper_func = get_helper(config.get('Environment', 'Browser'))
     context.helper = helper_func
-    context.session = {"user": None}
 
 def after_all(context):
     context.helper.close()

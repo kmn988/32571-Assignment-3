@@ -1,28 +1,20 @@
 from urllib.parse import unquote
-
 from behave import given, when, then
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from helper.helper_shop import CATEGORY_URL, HOME_URL, SUBCATEGORY_URL, amounts, xpath_literal
 
-from helper.helper_shop import amounts, xpath_literal
-
-# ---------- Locators (OpenCart 3 default theme): adjust here if the DOM changes ----------
+# --- Locators ---
 PAGE_HEADING = (By.CSS_SELECTOR, "#content h2")
 TOP_MENU_ITEMS = "//*[@id='menu']//ul[contains(@class,'nav')]/li"
 SUBMENU_ITEMS = "//*[@id='content']//ul/li"
-CATEGORY_URL = "https://opencart.abstracta.us/index.php?route=product/category&path=25"
-SUBCATEGORY_URL = "https://opencart.abstracta.us/index.php?route=product/category&path=25_28"
 
-
-
-# ---------- Steps ----------
+# --- Steps ---
 @given('I am on the OpenCart homepage')
 def step_open_homepage(context):
-    context.helper.open_homepage()
-    context.helper.wait_for_page_load()
-
+    context.helper.open(HOME_URL)
 
 @when('I select the category "{category}" from the main navigation')
 def step_select_category_from_nav(context, category):
@@ -54,7 +46,6 @@ def verify_page_heading(context, category):
 def step_open_category_page(context, category):
     helper = context.helper
     helper.open(CATEGORY_URL)
-    helper.wait_for_page_load()
 
 @when('I select the subcategory "{subcategory}"')
 def step_select_subcategory(context, subcategory):
@@ -79,7 +70,6 @@ def step_verify_product_list(context):
 def step_open_subcategory_page(context, subcategory):
     helper = context.helper
     helper.open(SUBCATEGORY_URL)
-    helper.wait_for_page_load()
 
 @when('I sort the products by "{sort_option}"')
 def step_sort_products(context, sort_option):
