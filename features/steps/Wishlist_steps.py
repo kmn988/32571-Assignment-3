@@ -13,29 +13,38 @@ def step_logged_in_user(context):
 def step_empty_wishlist(context):
     helper = context.helper
     helper.open(WISHLIST_URL)
+
+    # Remove all items from the wishlist if any are present
     while True:
         remove_buttons = helper.find_all_by_css("#content a[href*='wishlist&remove=']")
         if not remove_buttons:
             break
         helper.click_element(remove_buttons[0])
+        helper.wait().until(EC.staleness_of(remove_buttons[0]))
 
 @given('I am on the product page for "{product_name}"')
 def step_on_product_page(context, product_name):
     helper = context.helper
     search_url = f"{SEARCH_URL}{product_name}"
     helper.open(search_url)
+
+    # Find the product link in the search results and click it
     product_link = helper.find_by_xpath(f"//div[@class='caption']//a[normalize-space()={xpath_literal(product_name)}]")
     product_link.click()
 
 @when('I add the product to my wishlist')
 def step_add_to_wishlist(context):
     helper = context.helper
+
+    # Find the "Add to Wish List" button on the product page and click it
     add_to_wishlist_button = helper.find_by_xpath("//button[@data-original-title='Add to Wish List']")
     add_to_wishlist_button.click()
 
 @then('I should see a confirmation that the product was added to the wishlist')
 def step_verify_wishlist_confirmation(context):
     helper = context.helper
+
+    # Wait until the confirmation message is visible and verify its content
     confirmation_message = helper.find_by_css(".alert-success").text
     assert "Success: You have added" in confirmation_message and "to your wish list!" in confirmation_message, f"Expected confirmation message, but got: '{confirmation_message}'"
 
@@ -43,6 +52,8 @@ def step_verify_wishlist_confirmation(context):
 def step_verify_wishlist_contains_product(context, product_name):
     helper = context.helper
     helper.open(WISHLIST_URL)
+
+    # Wait until the wishlist items are visible and verify that the specified product is present
     wishlist_items = helper.find_all_by_css(".table-responsive .text-left a")
     product_names = [item.text for item in wishlist_items]
     assert product_name in product_names, f"Expected '{product_name}' to be in wishlist, but got: {product_names}"
@@ -72,7 +83,9 @@ def step_open_wishlist_page(context):
 def step_add_product_to_cart_from_wishlist(context, product_name):
     helper = context.helper
     helper.open(WISHLIST_URL)
+    # Wait until the wishlist items are visible and find the specified product
     wishlist_items = helper.find_all_by_css(".table-responsive .text-left a")
+    # Check if the product is present in the wishlist and click the "Add to Cart" button for that product
     for item in wishlist_items:
         if item.text.strip() == product_name:
             row = item.find_element(By.XPATH, "./ancestor::tr")
@@ -87,6 +100,8 @@ def step_add_product_to_cart_from_wishlist(context, product_name):
 def step_verify_cart_contains_product(context, product_name):
     helper = context.helper
     helper.open(CART_URL)
+
+    # Wait until the cart items are visible and verify that the specified product is present
     cart_items = helper.find_all_by_css(".table-responsive .text-left a")
     product_names = [item.text for item in cart_items]
     assert product_name in product_names, f"Expected '{product_name}' to be in cart, but got: {product_names}"
@@ -95,6 +110,8 @@ def step_verify_cart_contains_product(context, product_name):
 def step_remove_product_from_wishlist(context, product_name):
     helper = context.helper
     helper.open(WISHLIST_URL)
+
+    # Wait until the wishlist items are visible and find the specified product
     remove_button = helper.find_by_xpath(
         f"//tr[.//a[normalize-space()={xpath_literal(product_name)}]]//a[contains(@href,'wishlist&remove=')]"
     )
@@ -103,12 +120,16 @@ def step_remove_product_from_wishlist(context, product_name):
 @then('I should see a confirmation that the product was removed from the wishlist')
 def step_verify_wishlist_removal_confirmation(context):
     helper = context.helper
+
+    # Wait until the confirmation message is visible and verify its content
     confirmation_message = helper.find_by_css(".alert-success").text
     assert "Success: You have modified your wish list!" in confirmation_message, f"Expected removal confirmation message, but got: '{confirmation_message}'"
 
 @then('the wishlist should not contain "{product_name}"')
 def step_verify_wishlist_excludes_product(context, product_name):
     helper = context.helper
+
+    # Wait until the wishlist items are visible and verify that the specified product is not present
     wishlist_items = helper.find_all_by_css(".table-responsive .text-left a")
     product_names = [item.text for item in wishlist_items]
     assert product_name not in product_names, f"Expected '{product_name}' to be removed from wishlist, but got: {product_names}"

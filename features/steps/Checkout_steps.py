@@ -54,6 +54,8 @@ def step_fill_billing_details(context):
         if not existing.is_selected():
             helper.click_element(existing)
     else:
+
+        # Fill out the billing form with test data
         for field_id, value in [
             ("input-payment-firstname", "QA"),
             ("input-payment-lastname", "Tester"),
@@ -69,6 +71,7 @@ def step_fill_billing_details(context):
             postcode.clear()
             postcode.send_keys("90001")
 
+        # Select country and state/province
         select_when_ready(helper, "input-payment-country", "United States")
         select_when_ready(helper, "input-payment-zone", "California")
 
@@ -79,6 +82,7 @@ def step_fill_billing_details(context):
 @when('I fill out my delivery details')
 def step_fill_delivery_details(context):
     helper = context.helper
+    # Wait until either the shipping address continue button or the shipping method continue button is visible
     helper.wait().until(
         lambda d: any_visible(d, By.CSS_SELECTOR, SHIPPING_ADDRESS_CONTINUE)
         or any_visible(d, By.CSS_SELECTOR, SHIPPING_METHOD_CONTINUE)
@@ -94,6 +98,8 @@ def step_fill_delivery_details(context):
 @when('I select a delivery method')
 def step_select_delivery_method(context):
     helper = context.helper
+
+    # Wait until the shipping method continue button is visible
     flat_shipping_radio = helper.find_by_css("input[name='shipping_method'][value='flat.flat']")
     if not flat_shipping_radio.is_selected():
         helper.click_element(flat_shipping_radio)
@@ -103,6 +109,7 @@ def step_select_delivery_method(context):
 @when('I select a payment method')
 def step_select_payment_method(context):
     helper = context.helper
+    # Wait until the payment method continue button is visible
     helper.find_by_css("#collapse-payment-method.in")
     cod_radio = helper.find_by_css("input[name='payment_method'][value='cod']")
     if not cod_radio.is_selected():
@@ -117,6 +124,8 @@ def step_select_payment_method(context):
 @when('I confirm the order')
 def step_confirm_order(context):
     helper = context.helper
+
+    # Wait until the confirm order button is visible and click it
     helper.click_element(helper.find_by_css("input[value='Confirm Order']"))
     time.sleep(2)  # wait for the next step to be ready
 
@@ -124,6 +133,8 @@ def step_confirm_order(context):
 @then('I should be on the order confirmation page')
 def step_verify_order_confirmation(context):
     helper = context.helper
+
+    # Wait until the URL contains 'checkout/success' and verify that the order confirmation message is displayed
     helper.wait().until(lambda d: "checkout/success" in d.current_url)
     confirmation_message = helper.find_by_css("#content h1").text.strip()
     assert "Your order has been placed!" in confirmation_message, (
@@ -136,11 +147,13 @@ def step_leave_mandatory_billing_fields_empty(context):
     helper = context.helper
     helper.find_by_css(BILLING_CONTINUE)  
 
+    # Wait until the new address radio button is visible and select it
     new_address_radio = displayed(helper, BILLING_NEW)
     if new_address_radio:
         if not new_address_radio.is_selected():
             helper.click_element(new_address_radio)
 
+    # Clear the mandatory billing fields
     for field_id in [
         "input-payment-firstname",
         "input-payment-lastname",
@@ -155,6 +168,8 @@ def step_leave_mandatory_billing_fields_empty(context):
 @then('I should see validation feedback for the missing required fields')
 def step_verify_validation_feedback(context):
     helper = context.helper
+
+    # Wait until the validation feedback elements are visible and verify their content
     first_name_feedback = billing_error(helper, "firstname")
     last_name_feedback = billing_error(helper, "lastname")
     address_feedback = billing_error(helper, "address-1")
@@ -179,7 +194,8 @@ def step_verify_validation_feedback(context):
 def step_empty_cart(context):
     helper = context.helper
     helper.open(CART_URL)
-    
+
+    # Remove all items from the cart if any are present
     while True:
         remove_buttons = helper.find_all_by_css("#content .table-responsive .btn-danger")
         if not remove_buttons:
@@ -197,9 +213,13 @@ def step_navigate_to_checkout(context):
 @then('the page should show my cart is empty')
 def step_verify_empty_cart(context):
     helper = context.helper
+    # Wait until the URL contains 'checkout/cart' and verify that the current URL indicates an empty cart
     assert "checkout/checkout" not in helper.driver.current_url, "Checkout page opened with an empty cart"
+
     assert "checkout/cart" in helper.driver.current_url, (
         f"Expected to be redirected to the cart page, but was on {helper.driver.current_url}"
     )
+
+    # Verify that the empty cart message is displayed
     message = helper.find_by_xpath("//div[@id='content']//p[contains(.,'Your shopping cart is empty')]").text.strip()
     assert "Your shopping cart is empty!" in message, f"Expected empty cart message, but got '{message}'"
